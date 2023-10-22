@@ -1,3 +1,5 @@
+/* WiFi Handler souce imported from ESP-IDF examples.*/
+
 #ifndef WIFI_HANDLER_H
 #define WIFI_HANDLER_H
 

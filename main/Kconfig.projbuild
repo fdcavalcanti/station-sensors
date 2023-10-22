@@ -18,6 +18,12 @@ menu "Weater Station Node"
         help
             URL of the broker to connect to
 
+    config BROKER_PORT
+        int "Broker PORT"
+        default 5000
+        help
+            Broker port to connect to
+
     choice ESP_WIFI_SAE_MODE
         prompt "WPA3 SAE mode selection"
         default ESP_WPA3_SAE_PWE_BOTH

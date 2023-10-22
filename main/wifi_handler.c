@@ -1,3 +1,5 @@
+/* WiFi Handler souce imported from ESP-IDF examples.*/
+
 #include "wifi_handler.h"
 
 void event_handler(void* arg, esp_event_base_t event_base,

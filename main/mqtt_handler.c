@@ -1,3 +1,5 @@
+/* MQTT Handler souce imported from ESP-IDF examples.*/
+
 #include "esp_log.h"
 #include "mqtt_handler.h"
 
@@ -81,6 +83,7 @@ void mqtt_app_start(void)
 {
     esp_mqtt_client_config_t mqtt_cfg = {
         .broker.address.uri = CONFIG_BROKER_URL,
+        .broker.address.port = CONFIG_BROKER_PORT,
     };
 
     esp_mqtt_client_handle_t client = esp_mqtt_client_init(&mqtt_cfg);

@@ -34,15 +34,21 @@ void app_main(void)
     }
     ESP_ERROR_CHECK(ret);
 
-    ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
     wifi_init_sta();
 
-    esp_log_level_set("*", ESP_LOG_INFO);
-    esp_log_level_set("mqtt_client", ESP_LOG_VERBOSE);
-    esp_log_level_set("MQTT_EXAMPLE", ESP_LOG_VERBOSE);
-    esp_log_level_set("TRANSPORT_BASE", ESP_LOG_VERBOSE);
-    esp_log_level_set("esp-tls", ESP_LOG_VERBOSE);
-    esp_log_level_set("TRANSPORT", ESP_LOG_VERBOSE);
-    esp_log_level_set("outbox", ESP_LOG_VERBOSE);
-    mqtt_app_start();
+    esp_mqtt_client_config_t mqtt_cfg = {
+        .broker.address.hostname = CONFIG_BROKER_URL,
+        .broker.address.transport = MQTT_TRANSPORT_OVER_TCP,
+        .broker.address.port = CONFIG_BROKER_PORT,
+    };
+    esp_mqtt_client_handle_t client = esp_mqtt_client_init(&mqtt_cfg);
+    esp_mqtt_client_register_event(client, ESP_EVENT_ANY_ID, mqtt_event_handler, NULL);
+    esp_mqtt_client_start(client);
+
+    for (int i = 10; i >= 0; i--) {
+        printf("iteration %d...\n", i);
+        esp_mqtt_client_publish(client, "/topic/home_station", "val val", 0, 0, 0);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+
 }
