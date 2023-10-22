@@ -17,35 +17,23 @@
    CONDITIONS OF ANY KIND, either express or implied.
 */
 #include <stdio.h>
-#include <inttypes.h>
-#include "sdkconfig.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "esp_log.h"
+#include <string.h>
 
-#include "station_sensors.h"
+#include "wifi_handler.h"
 
-static const char *TAG = "i2c-simple-example";
+// static const char *TAG = "weather-station-node";
 
 void app_main(void)
 {
-    uint8_t data[2];
-    printf("Example starts..\n");
-    for (int i = 10; i >= 0; i--) {
-    printf("Restarting in %d seconds...\n", i);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    //Initialize NVS
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+      ESP_ERROR_CHECK(nvs_flash_erase());
+      ret = nvs_flash_init();
     }
+    ESP_ERROR_CHECK(ret);
 
-    ESP_ERROR_CHECK(i2c_master_init());
-    ESP_LOGI(TAG, "I2C initialized successfully");
+    ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
+    wifi_init_sta();
 
-    /* Read the MPU9250 WHO_AM_I register, on power up the register should have the value 0x71 */
-    ESP_ERROR_CHECK(mpu9250_register_read(MPU9250_WHO_AM_I_REG_ADDR, data, 1));
-    ESP_LOGI(TAG, "WHO_AM_I = %X", data[0]);
-
-    /* Demonstrate writing by reseting the MPU9250 */
-    // ESP_ERROR_CHECK(mpu9250_register_write_byte(MPU9250_PWR_MGMT_1_REG_ADDR, 1 << MPU9250_RESET_BIT));
-
-    ESP_ERROR_CHECK(i2c_driver_delete(I2C_MASTER_NUM));
-    ESP_LOGI(TAG, "I2C de-initialized successfully");
 }
