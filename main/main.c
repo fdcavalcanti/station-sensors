@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include "wifi_handler.h"
+#include "mqtt_handler.h"
 
 // static const char *TAG = "weather-station-node";
 
@@ -36,4 +37,12 @@ void app_main(void)
     ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
     wifi_init_sta();
 
+    esp_log_level_set("*", ESP_LOG_INFO);
+    esp_log_level_set("mqtt_client", ESP_LOG_VERBOSE);
+    esp_log_level_set("MQTT_EXAMPLE", ESP_LOG_VERBOSE);
+    esp_log_level_set("TRANSPORT_BASE", ESP_LOG_VERBOSE);
+    esp_log_level_set("esp-tls", ESP_LOG_VERBOSE);
+    esp_log_level_set("TRANSPORT", ESP_LOG_VERBOSE);
+    esp_log_level_set("outbox", ESP_LOG_VERBOSE);
+    mqtt_app_start();
 }
