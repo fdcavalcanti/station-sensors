@@ -6,7 +6,5 @@ set(COMPONENT_SRCS "main.c"
                    "wifi_handler.c"                    
                    "mqtt_handler.c"
                )
-                #    "station_sensors.c"
-set(COMPONENT_ADD_INCLUDEDIRS ".")
 
 register_component()

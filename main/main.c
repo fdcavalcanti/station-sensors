@@ -7,11 +7,13 @@
 
 #include "wifi_handler.h"
 #include "mqtt_handler.h"
-
+#include "station_sensors.h"
+#include "bmx280.h"
 
 void app_main(void)
 {
-    //Initialize NVS
+    /*Initialize NVS */
+
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
       ESP_ERROR_CHECK(nvs_flash_erase());
@@ -19,7 +21,11 @@ void app_main(void)
     }
     ESP_ERROR_CHECK(ret);
 
+    /* Initialize WiFi*/
+
     wifi_init_sta();
+
+    /* Initialize MQTT */
 
     esp_mqtt_client_config_t mqtt_cfg = {
         .broker.address.hostname = CONFIG_BROKER_URL,
@@ -35,5 +41,23 @@ void app_main(void)
         esp_mqtt_client_publish(client, "/topic/home_station", "val val", 0, 0, 0);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
+
+    /* Initialize I2C */
+
+    // i2c_master_init();
+
+    /* Initialize BMP280 */
+ 
+    // bmx280_t* bmx280 = bmx280_create(I2C_MASTER_NUM);
+
+    // if (!bmx280) { 
+    //     ESP_LOGE("test", "Could not create bmx280 driver.");
+    //     return;
+    // }
+
+    // ESP_ERROR_CHECK(bmx280_init(bmx280));
+
+    // bmx280_config_t bmx_cfg = BMX280_DEFAULT_CONFIG;
+    // ESP_ERROR_CHECK(bmx280_configure(bmx280, &bmx_cfg));
 
 }
