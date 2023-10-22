@@ -1,0 +1,3 @@
+[submodule "bmp280"]
+    path = bmp280
+    url = https://github.com/utkumaden/esp-idf-bmx280.git
