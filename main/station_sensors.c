@@ -34,6 +34,7 @@ esp_err_t i2c_master_init(void)
         .scl_io_num = I2C_MASTER_SCL_IO,
         .sda_pullup_en = GPIO_PULLUP_DISABLE,
         .scl_pullup_en = GPIO_PULLUP_DISABLE,
+
         .master.clk_speed = I2C_MASTER_FREQ_HZ,
     };
 

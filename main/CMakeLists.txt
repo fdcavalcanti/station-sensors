@@ -5,6 +5,7 @@ set(COMPONENT_PRIV_REQUIRES )
 set(COMPONENT_SRCS "main.c"
                    "wifi_handler.c"                    
                    "mqtt_handler.c"
+                   "station_sensors.c"
                )
 
 register_component()

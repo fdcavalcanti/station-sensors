@@ -36,7 +36,7 @@ void app_main(void)
     esp_mqtt_client_register_event(client, ESP_EVENT_ANY_ID, mqtt_event_handler, NULL);
     esp_mqtt_client_start(client);
 
-    for (int i = 10; i >= 0; i--) {
+    for (int i = 3; i >= 0; i--) {
         printf("iteration %d...\n", i);
         esp_mqtt_client_publish(client, "/topic/home_station", "val val", 0, 0, 0);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
@@ -44,20 +44,33 @@ void app_main(void)
 
     /* Initialize I2C */
 
-    // i2c_master_init();
+    i2c_master_init();
 
     /* Initialize BMP280 */
  
-    // bmx280_t* bmx280 = bmx280_create(I2C_MASTER_NUM);
+    bmx280_t* bmx280 = bmx280_create(I2C_MASTER_NUM);
 
-    // if (!bmx280) { 
-    //     ESP_LOGE("test", "Could not create bmx280 driver.");
-    //     return;
-    // }
+    if (!bmx280) { 
+        ESP_LOGE("test", "Could not create bmx280 driver.");
+        return;
+    }
 
-    // ESP_ERROR_CHECK(bmx280_init(bmx280));
+    ESP_ERROR_CHECK(bmx280_init(bmx280));
 
-    // bmx280_config_t bmx_cfg = BMX280_DEFAULT_CONFIG;
-    // ESP_ERROR_CHECK(bmx280_configure(bmx280, &bmx_cfg));
+    bmx280_config_t bmx_cfg = BMX280_DEFAULT_CONFIG;
+    ESP_ERROR_CHECK(bmx280_configure(bmx280, &bmx_cfg));
+
+    while (1)
+    {
+        ESP_ERROR_CHECK(bmx280_setMode(bmx280, BMX280_MODE_FORCE));
+        do {
+            vTaskDelay(pdMS_TO_TICKS(1000));
+        } while(bmx280_isSampling(bmx280));
+
+        float temp = 0, pres = 0, hum = 0;
+        ESP_ERROR_CHECK(bmx280_readoutFloat(bmx280, &temp, &pres, &hum));
+
+        ESP_LOGI("test", "Read Values: temp = %f, pres = %f, hum = %f", temp, pres, hum);
+    }
 
 }
