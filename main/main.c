@@ -8,7 +8,6 @@
 #include "wifi_handler.h"
 #include "mqtt_handler.h"
 #include "station_sensors.h"
-#include "bmx280.h"
 
 void app_main(void)
 {
@@ -46,6 +45,9 @@ void app_main(void)
 
     i2c_master_init();
 
+    /* Initialize GPIO */
+    gpio_init();
+
     /* Initialize BMP280 */
  
     bmx280_t* bmx280 = bmx280_create(I2C_MASTER_NUM);
@@ -60,6 +62,10 @@ void app_main(void)
     bmx280_config_t bmx_cfg = BMX280_DEFAULT_CONFIG;
     ESP_ERROR_CHECK(bmx280_configure(bmx280, &bmx_cfg));
 
+    /* Initialize DHT22 */
+
+    setDHTgpio(GPIO_DHT_PIN);
+
     while (1)
     {
         ESP_ERROR_CHECK(bmx280_setMode(bmx280, BMX280_MODE_FORCE));
@@ -69,6 +75,12 @@ void app_main(void)
 
         float temp = 0, pres = 0, hum = 0;
         ESP_ERROR_CHECK(bmx280_readoutFloat(bmx280, &temp, &pres, &hum));
+		int ret = readDHT();
+		
+		errorHandler(ret);
+
+		printf( "Hum %.1f\n", getHumidity() );
+		printf( "Tmp %.1f\n", getTemperature() );
 
         ESP_LOGI("test", "Read Values: temp = %f, pres = %f, hum = %f", temp, pres, hum);
     }

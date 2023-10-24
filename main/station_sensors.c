@@ -1,29 +1,21 @@
 #include "station_sensors.h"
 
-/**
- * @brief Read a sequence of bytes.
- */
-esp_err_t mpu9250_register_read(uint8_t reg_addr, uint8_t *data, size_t len)
+/* Configure GPIO for DHT22 use */
+
+void gpio_init(void)
 {
-    return i2c_master_write_read_device(I2C_MASTER_NUM, MPU9250_SENSOR_ADDR, &reg_addr, 1, data, len, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
+    gpio_config_t conf = {
+        .pin_bit_mask = GPIO_INPUT_PIN_SEL,
+        .mode = GPIO_MODE_INPUT,
+        .pull_up_en = GPIO_PULLUP_ENABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE,
+    };
+    gpio_config(&conf);
 }
 
-/**
- * @brief Write a byte.
- */
-esp_err_t mpu9250_register_write_byte(uint8_t reg_addr, uint8_t data)
-{
-    int ret;
-    uint8_t write_buf[2] = {reg_addr, data};
+/* I2C initialization for BMP280 use */
 
-    ret = i2c_master_write_to_device(I2C_MASTER_NUM, MPU9250_SENSOR_ADDR, write_buf, sizeof(write_buf), I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
-
-    return ret;
-}
-
-/**
- * @brief i2c master initialization
- */
 esp_err_t i2c_master_init(void)
 {
     int i2c_master_port = I2C_MASTER_NUM;

@@ -1,3 +1,6 @@
 [submodule "components/esp-idf-bmx280"]
 	path = components/esp-idf-bmx280
 	url = git@github.com:utkumaden/esp-idf-bmx280.git
+[submodule "main/DHT22"]
+	path = main/DHT22
+	url = git@github.com:gosouth/DHT22.git
