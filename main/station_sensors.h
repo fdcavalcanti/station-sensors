@@ -16,6 +16,15 @@
 
 #define GPIO_DHT_PIN                18      /* GPIO Pin for DHT22 */
 #define GPIO_INPUT_PIN_SEL          (1ULL << GPIO_DHT_PIN)
+#define DHT_TIMEOUT_RETRIES         10
+#define MQTT_MSG_BUF_SIZE           10
+
+struct sensor_data {
+    float temperature_dht22;
+    float temperature_bmp280;
+    float pressure;
+    float humidity;
+};
 
 esp_err_t i2c_master_init(void);
 void gpio_init(void);

@@ -35,17 +35,12 @@ void app_main(void)
     esp_mqtt_client_register_event(client, ESP_EVENT_ANY_ID, mqtt_event_handler, NULL);
     esp_mqtt_client_start(client);
 
-    for (int i = 3; i >= 0; i--) {
-        printf("iteration %d...\n", i);
-        esp_mqtt_client_publish(client, "/topic/home_station", "val val", 0, 0, 0);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
-
     /* Initialize I2C */
 
     i2c_master_init();
 
     /* Initialize GPIO */
+
     gpio_init();
 
     /* Initialize BMP280 */
@@ -58,7 +53,6 @@ void app_main(void)
     }
 
     ESP_ERROR_CHECK(bmx280_init(bmx280));
-
     bmx280_config_t bmx_cfg = BMX280_DEFAULT_CONFIG;
     ESP_ERROR_CHECK(bmx280_configure(bmx280, &bmx_cfg));
 
@@ -68,21 +62,53 @@ void app_main(void)
 
     while (1)
     {
-        ESP_ERROR_CHECK(bmx280_setMode(bmx280, BMX280_MODE_FORCE));
+        struct sensor_data data = {0};
+        bmx280_setMode(bmx280, BMX280_MODE_FORCE);
         do {
-            vTaskDelay(pdMS_TO_TICKS(1000));
+            vTaskDelay(pdMS_TO_TICKS(2000));
         } while(bmx280_isSampling(bmx280));
 
-        float temp = 0, pres = 0, hum = 0;
-        ESP_ERROR_CHECK(bmx280_readoutFloat(bmx280, &temp, &pres, &hum));
-		int ret = readDHT();
-		
-		errorHandler(ret);
+        bmx280_readoutFloat(bmx280,
+                            &data.temperature_bmp280,
+                            &data.pressure,
+                            &data.humidity);
 
-		printf( "Hum %.1f\n", getHumidity() );
-		printf( "Tmp %.1f\n", getTemperature() );
+        /* DHT22 usually loses data. Read a few times just in case. */
 
-        ESP_LOGI("test", "Read Values: temp = %f, pres = %f, hum = %f", temp, pres, hum);
+        int iter = 0;
+		do 
+        {
+            int ret = readDHT();
+            errorHandler(ret);
+            /* Must wait 3 seconds before retrying */
+            vTaskDelay(pdMS_TO_TICKS(3000));
+            iter++;
+        } while ( (ret != DHT_OK) && (iter < DHT_TIMEOUT_RETRIES) );
+
+        data.humidity = getHumidity();
+        data.temperature_dht22 = getTemperature();
+
+        /* Log to serial */
+
+        ESP_LOGI("main", "temp_dht22 = %f, temp_bmp280 = %f pres = %f, hum = %f",
+                 data.temperature_dht22, data.temperature_bmp280, data.pressure,
+                 data.humidity);
+
+        /* Publish with MQTT */
+
+        char buf[MQTT_MSG_BUF_SIZE];
+
+        snprintf(buf, MQTT_MSG_BUF_SIZE, "%.4f", data.temperature_bmp280);        
+        esp_mqtt_client_publish(client, "home_station/temp_bmp280", buf, 0, 0, 0);
+
+        snprintf(buf, MQTT_MSG_BUF_SIZE, "%.4f", data.temperature_dht22);        
+        esp_mqtt_client_publish(client, "home_station/temp_dht22", buf, 0, 0, 0);
+
+        snprintf(buf, MQTT_MSG_BUF_SIZE, "%.4f", data.pressure);        
+        esp_mqtt_client_publish(client, "home_station/temp_pressure", buf, 0, 0, 0);
+
+        snprintf(buf, MQTT_MSG_BUF_SIZE, "%.4f", data.humidity);        
+        esp_mqtt_client_publish(client, "home_station/temp_humidity", buf, 0, 0, 0);
     }
 
 }
