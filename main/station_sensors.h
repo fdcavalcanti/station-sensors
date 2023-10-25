@@ -19,6 +19,7 @@
 #define DHT_TIMEOUT_RETRIES         10
 #define MQTT_MSG_BUF_SIZE           10
 
+#define LOCAL_ALTITUDE              685     /* Altitude in Campinas - SP */
 struct sensor_data {
     float temperature_dht22;
     float temperature_bmp280;
@@ -28,5 +29,7 @@ struct sensor_data {
 
 esp_err_t i2c_master_init(void);
 void gpio_init(void);
+float absolute_to_relative_pressure(float pressure, float altitude,
+                                    float temperature);
 
 #endif  // STATIONS_SENSORS_H

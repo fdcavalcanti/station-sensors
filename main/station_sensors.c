@@ -1,4 +1,5 @@
 #include "station_sensors.h"
+#include <math.h>
 
 /* Configure GPIO for DHT22 use */
 
@@ -33,4 +34,12 @@ esp_err_t i2c_master_init(void)
     i2c_param_config(i2c_master_port, &conf);
 
     return i2c_driver_install(i2c_master_port, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0);
+}
+
+float absolute_to_relative_pressure(float pressure, float altitude, float temperature) {
+  float rel_pres =
+      pressure *
+      pow(1 - (0.0065 * altitude) / (temperature + 0.0065 * altitude + 273.15),
+          -5.257);
+  return rel_pres / 100.0f;
 }

@@ -68,10 +68,14 @@ void app_main(void)
             vTaskDelay(pdMS_TO_TICKS(2000));
         } while(bmx280_isSampling(bmx280));
 
+        float abs_pressure;
         bmx280_readoutFloat(bmx280,
                             &data.temperature_bmp280,
-                            &data.pressure,
+                            &abs_pressure,
                             &data.humidity);
+        data.pressure = absolute_to_relative_pressure(abs_pressure,
+                                                      LOCAL_ALTITUDE,
+                                                      data.temperature_bmp280);
 
         /* DHT22 usually loses data. Read a few times just in case. */
 
@@ -105,10 +109,10 @@ void app_main(void)
         esp_mqtt_client_publish(client, "home_station/temp_dht22", buf, 0, 0, 0);
 
         snprintf(buf, MQTT_MSG_BUF_SIZE, "%.4f", data.pressure);        
-        esp_mqtt_client_publish(client, "home_station/temp_pressure", buf, 0, 0, 0);
+        esp_mqtt_client_publish(client, "home_station/pressure", buf, 0, 0, 0);
 
         snprintf(buf, MQTT_MSG_BUF_SIZE, "%.4f", data.humidity);        
-        esp_mqtt_client_publish(client, "home_station/temp_humidity", buf, 0, 0, 0);
+        esp_mqtt_client_publish(client, "home_station/humidity", buf, 0, 0, 0);
     }
 
 }
