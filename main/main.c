@@ -61,7 +61,8 @@ void app_main(void)
     setDHTgpio(GPIO_DHT_PIN);
 
     while (1)
-    {
+    {   
+        int minutes_passed = 0;
         struct sensor_data data = {0};
         bmx280_setMode(bmx280, BMX280_MODE_FORCE);
         do {
@@ -113,6 +114,12 @@ void app_main(void)
 
         snprintf(buf, MQTT_MSG_BUF_SIZE, "%.4f", data.humidity);        
         esp_mqtt_client_publish(client, "home_station/humidity", buf, 0, 0, 0);
+
+        for (int min_passed=0; min_passed < STATION_REFRESH_WAIT_MIN; min_passed++)
+        {
+            vTaskDelay(pdMS_TO_TICKS(1000 * 60));
+        }
+
     }
 
 }

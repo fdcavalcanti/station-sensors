@@ -20,6 +20,8 @@
 #define MQTT_MSG_BUF_SIZE           10
 
 #define LOCAL_ALTITUDE              685     /* Altitude in Campinas - SP */
+#define STATION_REFRESH_WAIT_MIN    15      /* Time to wait in minutes beteween updates */
+
 struct sensor_data {
     float temperature_dht22;
     float temperature_bmp280;
