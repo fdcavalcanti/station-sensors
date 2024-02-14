@@ -63,6 +63,7 @@ void app_main(void)
     while (1)
     {   
         struct sensor_data data = {0};
+        int qos_ret = 0;
         bmx280_setMode(bmx280, BMX280_MODE_FORCE);
         do {
             vTaskDelay(pdMS_TO_TICKS(2000));
@@ -104,21 +105,26 @@ void app_main(void)
         char buf_all[MQTT_MSG_BUF_SIZE*5];
 
         snprintf(buf, MQTT_MSG_BUF_SIZE, "%.4f", data.temperature_bmp280);        
-        esp_mqtt_client_publish(client, "home_station/temp_bmp280", buf, 0, 0, 0);
+        qos_ret += esp_mqtt_client_publish(client, "home_station/temp_bmp280", buf, 0, 1, 0);
 
         snprintf(buf, MQTT_MSG_BUF_SIZE, "%.4f", data.temperature_dht22);        
-        esp_mqtt_client_publish(client, "home_station/temp_dht22", buf, 0, 0, 0);
+        qos_ret += esp_mqtt_client_publish(client, "home_station/temp_dht22", buf, 0, 1, 0);
 
         snprintf(buf, MQTT_MSG_BUF_SIZE, "%.4f", data.pressure);        
-        esp_mqtt_client_publish(client, "home_station/pressure", buf, 0, 0, 0);
+        qos_ret += esp_mqtt_client_publish(client, "home_station/pressure", buf, 0, 1, 0);
 
         snprintf(buf, MQTT_MSG_BUF_SIZE, "%.4f", data.humidity);        
-        esp_mqtt_client_publish(client, "home_station/humidity", buf, 0, 0, 0);
+        qos_ret += esp_mqtt_client_publish(client, "home_station/humidity", buf, 0, 1, 0);
 
         snprintf(buf_all, sizeof(buf_all), "%.4f,%.4f,%.4f,%.4f",
                  data.temperature_bmp280, data.temperature_dht22,
                  data.pressure, data.humidity);        
-        esp_mqtt_client_publish(client, "home_station/all", buf_all, 0, 0, 0);
+        qos_ret += esp_mqtt_client_publish(client, "home_station/all", buf_all, 0, 1, 0);
+
+        if (qos_ret != 0) {
+            ESP_LOGE("test", "Restarting ESP to reestablish network connection!");
+            esp_restart();
+        }
 
         for (int min_passed=0; min_passed < STATION_REFRESH_WAIT_MIN; min_passed++)
         {
